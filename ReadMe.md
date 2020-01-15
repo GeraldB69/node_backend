@@ -6,9 +6,9 @@
 3 roles différents : psy_online, psy_busy, psy_offline.
 
 Routes :
-/users/psy_on :   psychologues disponibles (compteur) [psy]
-/users/psy_busy : psychologues occupés (compteur) [psy]
-/users/psy_off :  psychologues indisponibles (compteur) [psy]
+- /users/psy_on :   psychologues disponibles (compteur) [psy]
+- /users/psy_busy : psychologues occupés (compteur) [psy]
+- /users/psy_off :  psychologues indisponibles (compteur) [psy]
 
 
 ### Tickets
@@ -18,11 +18,11 @@ Routes :
   - closed :  une conversation a eu lieu et elle a été coturée.
 
 Routes:
-/tickets?token= :  lien du collaborateur pour ouvrir / poursuivre un ticket [collab]
-/tickets/all :     tous les tickets [psy]
-/tickets/pending : tous les tickets non cloturés [psy]
+- /tickets?token= :  lien du collaborateur pour ouvrir / poursuivre un ticket [collab]
+- /tickets/all :     tous les tickets [psy]
+- /tickets/pending : tous les tickets non cloturés [psy]
 
 
 ## POST
 
-/tickets?token=123 : création / relance d'un ticket
+- /tickets?token=123 : création / relance d'un ticket
