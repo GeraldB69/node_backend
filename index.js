@@ -33,21 +33,6 @@ let users = [];
 
 io.on('connection', function (socket) {
   console.log('a user connected');
-  const user = {}
-  // socket.on('join', function ({ room, username }) {
-  //   user.username=username
-  //   users.push(username);
-  //   console.log(room, username, users)
-  //   socket.join(room)
-  //   io.to(room).emit('message', users)
-  //   io.to(room).emit('message', 'toto')
-  // })
-
-  // socket.on('message', function (message) {
-  //   console.log("ID", message);
-  //   io.emit('message', message);
-  // }) 
-
 
   socket.on('waiting room', function (id) {
     console.log("socket has joined the waiting room", id);
