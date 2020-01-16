@@ -1,32 +1,76 @@
 // Déclaration des librairies
-const express = require('express');
+const app = require('express')();
+// const app = require('express')();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
 const bodyParser = require('body-parser');
-const app = express();
-const morgan = require('morgan');
 const router = require('./routes');
+const cors = require('cors');
 const port = 4000;
 
+global.channel = '';
 
 // Configuration de l'application
-const connection = require('./helpers/db.js'); // Pour info, non utilisé ici
-app.use(morgan('dev'));
+// const connection = require('./helpers/db.js');
+app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+// Récupérer les infos qui passent...
+app.use((req, res, next) => {
+  const infos = { ...req.body }
+  console.log(infos);
+  next();
+});
+
+// Router
 app.use('/', router);
+
+// Socket.io
+let users = [];
+
+io.on('connection', function (socket) {
+  console.log('a user connected');
+  const user= {}
+  socket.on('join', function ({ room, username }) {
+    user.username=username
+    users.push(username);
+    console.log(room, username, users)
+    socket.join(room)
+    io.to(room).emit('join', users)
+    io.to(room).emit('message', 'toto')
+  })
+
+  socket.on('message', function (message) {
+    console.log("ID", message);
+    io.emit('message', message);
+  })
+
+  socket.on('disconnect', function (t) {
+    console.log("discon",user)
+    users = users.filter(u => u !== user.username)
+  });
+});
+
 
 // Test de l'API
 app.get("/", (req,res) => {
+  console.log("OK...")
   res.send("OK...");
 });
 
+
 // Erreur 404 / 'Not Found'
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
+  const err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
 // Lancement du serveur
-let server = app.listen(port, (err) => {
+server.listen(port, (err) => {
   if (err) {
     throw new Error('Something bad happened...');
   }
