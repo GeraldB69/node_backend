@@ -33,37 +33,49 @@ let users = [];
 
 io.on('connection', function (socket) {
   console.log('a user connected');
-  const user= {}
-  socket.on('join', function ({ room, username }) {
-    user.username=username
-    users.push(username);
-    console.log(room, username, users)
-    socket.join(room)
-    io.to(room).emit('join', users)
-    io.to(room).emit('message', 'toto')
+  const user = {}
+  // socket.on('join', function ({ room, username }) {
+  //   user.username=username
+  //   users.push(username);
+  //   console.log(room, username, users)
+  //   socket.join(room)
+  //   io.to(room).emit('message', users)
+  //   io.to(room).emit('message', 'toto')
+  // })
+
+  // socket.on('message', function (message) {
+  //   console.log("ID", message);
+  //   io.emit('message', message);
+  // }) 
+
+
+  socket.on('waiting room', function (id) {
+    console.log("socket has joined the waiting room", id);
+    socket.join(id)
   })
 
-  socket.on('message', function (message) {
-    console.log("ID", message);
-    io.emit('message', message);
+  socket.on("message", function (objet) {
+    console.log("message:", objet.message) 
+    io.to((objet.channel)).emit('waiting room', objet) 
+    // socket.broadcast.to("waiting room").emit('waiting room', payload.msg)
   })
 
-  socket.on('disconnect', function (t) {
-    console.log("discon",user)
+  socket.on('disconnect', function (t) { 
+    console.log("discon", user)
     users = users.filter(u => u !== user.username)
   });
 });
 
 
 // Test de l'API
-app.get("/", (req,res) => {
+app.get("/", (req, res) => {
   console.log("OK...")
   res.send("OK...");
 });
 
 
 // Erreur 404 / 'Not Found'
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   const err = new Error('Not Found');
   err.status = 404;
   next(err);

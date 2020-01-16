@@ -83,8 +83,7 @@ router.get('/pending', (req, res) => {
 router.post('/', (req, res) => {
   
   // Infos envoyées par le client ({ id (collab), pseudo, token, message })
-  const body = { ...req.body }; 
-  console.log("ticket-87", req.body)
+  const body = { ...req.body };
   
   // Recherche du collaborateur (id) dans la table 'tickets' dont le ticket serait "en cours"
   const waitingTickets = 
