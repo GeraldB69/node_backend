@@ -1,14 +1,11 @@
 // Déclaration des librairies
 const app = require('express')();
-// const app = require('express')();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const bodyParser = require('body-parser');
 const router = require('./routes');
 const cors = require('cors');
 const port = 4000;
-
-global.channel = '';
 
 // Configuration de l'application
 // const connection = require('./helpers/db.js');
@@ -29,31 +26,25 @@ app.use((req, res, next) => {
 app.use('/', router);
 
 // Socket.io
-let users = [];
-
 io.on('connection', function (socket) {
-  console.log('a user connected');
-  const user= {}
-  socket.on('join', function ({ room, username }) {
-    user.username=username
-    users.push(username);
-    console.log(room, username, users)
-    socket.join(room)
-    io.to(room).emit('join', users)
-    io.to(room).emit('message', 'toto')
+  console.log('User connected');
+  socket.on('waiting room', function(id) {
+    console.log("socket has joined the waiting room", id);
+    socket.join(id)
   })
 
-  socket.on('message', function (message) {
-    console.log("ID", message);
-    io.emit('message', message);
+  socket.on("message", function (objet) {
+    console.log("message:", objet)
+    io.to((objet.channel)).emit('waiting room', objet)
+    io.to((objet.channel)).emit('writing', objet)
+    // socket.broadcast.to("waiting room").emit('waiting room', payload.msg)
   })
 
-  socket.on('disconnect', function (t) {
-    console.log("discon",user)
-    users = users.filter(u => u !== user.username)
+  socket.on('disconnect', function () {
+    console.log("disconnected")
+    // users = users.filter(u => u !== user.username)
   });
 });
-
 
 // Test de l'API
 app.get("/", (req,res) => {
