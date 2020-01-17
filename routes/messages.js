@@ -21,50 +21,54 @@ router.use(bodyParser.urlencoded({
 
 // Affichage des messages d'un Collaborateur en particulier
 // '?cid='
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
   const collabId = req.query.cid;
-  console.log("messages-cid", collabId)
-  const sql =   
-    'SELECT * FROM test_hpi.messages AS M ' + 
-    'INNER JOIN (SELECT * ' + 
-    'FROM test_hpi.tickets) AS T ' + 
-    'INNER JOIN (SELECT * ' + 
-    'FROM test_hpi.users) AS U ' + 
-    'ON M.collab_id = T.collab_id ' + 
-    'WHERE M.collab_id = ? ';
-    // 'AND M.collab_id = ?';
-  connection.query(sql, [collabId], (error, response) => {
-    console.log(response)
-    if (error) 
-      res.sendStatus(500);
-    else 
-      (response.length > 0) 
-      ? res.status(200).json(response) 
-      : res.status(404).send("Not Found");
-  });
+  if (collabId) {
+    console.log("messages-cid", collabId)
+    const sql =   
+      'SELECT * FROM test_hpi.messages AS M ' + 
+      'INNER JOIN (SELECT * ' + 
+      'FROM test_hpi.tickets) AS T ' + 
+      'INNER JOIN (SELECT * ' + 
+      'FROM test_hpi.users) AS U ' + 
+      'ON M.collab_id = T.collab_id ' + 
+      'WHERE M.collab_id = ? ';
+      // 'AND M.collab_id = ?';
+    connection.query(sql, [collabId], (error, response) => {
+      console.log(response)
+      if (error) 
+        res.sendStatus(500);
+      else 
+        (response.length > 0) 
+        ? res.status(200).json(response) 
+        : res.status(404).send("Not Found");
+    });
+  } else next();
 })
 
 // Affichage des messages d'un Channel en particulier
 // '?chid='
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
   const channelId = req.query.chid;
-  console.log("messages-chid", channelId)
-  const sql =   
-    'SELECT * FROM test_hpi.messages AS M ' + 
-    'INNER JOIN (SELECT * ' + 
-    'FROM test_hpi.tickets) AS T ' + 
-    'ON T.id = M.tickets_id ' + 
-    'WHERE T.channel = ? ' + 
-    'ORDER BY M.timestamp ASC ';
-  connection.query(sql, [channelId], (error, response) => {
-    console.log(response)
-    if (error) 
-      res.sendStatus(500);
-    else 
-      (response.length > 0) 
-      ? res.status(200).json(response) 
-      : res.status(404).send("Not Found");
-  });
+  if (channelId) {
+    console.log("messages-chid", req)
+    const sql =   
+      'SELECT * FROM test_hpi.messages AS M ' + 
+      'INNER JOIN (SELECT * ' + 
+      'FROM test_hpi.tickets) AS T ' + 
+      'ON T.id = M.tickets_id ' + 
+      'WHERE T.channel = ? ' + 
+      'ORDER BY M.timestamp ASC ';
+    connection.query(sql, [channelId], (error, response) => {
+      console.log(response)
+      if (error) 
+        res.sendStatus(500);
+      else 
+        (response.length > 0) 
+        ? res.status(200).json(response) 
+        : res.status(404).send("Not Found");
+    });
+  } else next();
 })
 
 
