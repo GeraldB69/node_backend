@@ -39,6 +39,14 @@ io.on('connection', function (socket) {
     socket.join(id)
   })
 
+  socket.on('leave room', (id) =>{
+    console.log("socket has leaved room", id);
+    io.to(id).emit('waiting room', {message:"presque parti"})
+    socket.leave(id , (err,res) =>   console.log(socket.adapter.rooms)
+    ) 
+    io.to(id).emit('waiting room', {message:"parti"}) 
+  }) 
+
   socket.on("message", function (objet) {
     console.log("message:", objet.message) 
     io.to((objet.channel)).emit('waiting room', objet) 
