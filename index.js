@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({
 // Récupérer les infos qui passent...
 app.use((req, res, next) => {
   const infos = { ...req.body }
-  console.log(infos);
+  console.log("21. req.body:", infos);
   next();
 });
 
