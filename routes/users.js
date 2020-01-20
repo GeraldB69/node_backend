@@ -42,6 +42,27 @@ router.get('/psy_off', (req, res) => {
   })
 })
 
+// GET //
+
+router.post('/auth/admin', (req, res) => {
+  const id = req.body.data
+  connection.query('SELECT * FROM users WHERE email = ?', [id.email], (error, response) => {
+    if (error)
+      res.status(500).json(error);
+    else if (response.length > 0) {
+      if (response[0].password === id.password) {
+        console.log('Identification OK')
+        res.status(200).json(response)
+      } else {
+        console.log("Mot de passe érroné")
+        res.status(404).json({ message: "Mot de passe érroné" })
+      }
+    } else {
+      console.log("email invalide")
+      res.status(404).json({ message: "Email invalid" })
+    }
+  })
+})
 
 
 module.exports = router;
