@@ -27,34 +27,41 @@ app.use('/', router);
 
 // Socket.io
 io.on('connection', function (socket) {
-  console.log('User connected');
-  socket.on('waiting room', function(id) {
-    console.log("socket has joined the waiting room", id);
-    socket.join(id)
+  console.log('a user connected', socket.id)
+
+  socket.on('waiting room', function (id) {
+    socket.join(id, ()=>{
+      console.log("socket has joined the waiting room", socket.id);
+    })
+    io.to((socket.id)).emit('waiting room', socket.id)
+  })
+
+  socket.on('leave room', object => {
+    socket = io.sockets.connected[object.clientId]
+    socket.leave(object.channel, () => {
+      console.log("socket has leaved room", socket.id);
+    })   
   })
 
   socket.on("message", function (objet) {
-    console.log("message:", objet)
+    console.log("message:", objet.message)
     io.to((objet.channel)).emit('waiting room', objet)
-    io.to((objet.channel)).emit('writing', objet)
-    // socket.broadcast.to("waiting room").emit('waiting room', payload.msg)
   })
 
-  socket.on('disconnect', function () {
-    console.log("disconnected")
-    // users = users.filter(u => u !== user.username)
+  socket.on('disconnect', function (t) {
+    console.log("disconnect")
   });
 });
 
 // Test de l'API
-app.get("/", (req,res) => {
+app.get("/", (req, res) => {
   console.log("OK...")
   res.send("OK...");
 });
 
 
 // Erreur 404 / 'Not Found'
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   const err = new Error('Not Found');
   err.status = 404;
   next(err);
