@@ -1,14 +1,11 @@
 // Déclaration des librairies
 const app = require('express')();
-// const app = require('express')();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const bodyParser = require('body-parser');
 const router = require('./routes');
 const cors = require('cors');
 const port = 4000;
-
-global.channel = '';
 
 // Configuration de l'application
 // const connection = require('./helpers/db.js');
@@ -55,7 +52,6 @@ io.on('connection', function (socket) {
     console.log("disconnect")
   });
 });
-
 
 // Test de l'API
 app.get("/", (req, res) => {
