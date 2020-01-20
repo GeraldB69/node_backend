@@ -29,33 +29,30 @@ app.use((req, res, next) => {
 app.use('/', router);
 
 // Socket.io
-let users = [];
-
 io.on('connection', function (socket) {
-  console.log('a user connected');
+  console.log('a user connected', socket.id)
 
   socket.on('waiting room', function (id) {
-    console.log("socket has joined the waiting room", id);
-    socket.join(id)
+    socket.join(id, ()=>{
+      console.log("socket has joined the waiting room", socket.id);
+    })
+    io.to((socket.id)).emit('waiting room', socket.id)
   })
 
-  socket.on('leave room', (id) =>{
-    console.log("socket has leaved room", id);
-    io.to(id).emit('waiting room', {message:"presque parti"})
-    socket.leave(id , (err,res) =>   console.log(socket.adapter.rooms)
-    ) 
-    io.to(id).emit('waiting room', {message:"parti"}) 
-  }) 
+  socket.on('leave room', object => {
+    socket = io.sockets.connected[object.clientId]
+    socket.leave(object.channel, () => {
+      console.log("socket has leaved room", socket.id);
+    })   
+  })
 
   socket.on("message", function (objet) {
-    console.log("message:", objet.message) 
-    io.to((objet.channel)).emit('waiting room', objet) 
-    // socket.broadcast.to("waiting room").emit('waiting room', payload.msg)
+    console.log("message:", objet.message)
+    io.to((objet.channel)).emit('waiting room', objet)
   })
 
-  socket.on('disconnect', function (t) { 
-    console.log("discon", user)
-    users = users.filter(u => u !== user.username)
+  socket.on('disconnect', function (t) {
+    console.log("disconnect")
   });
 });
 
