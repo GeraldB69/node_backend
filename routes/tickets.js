@@ -25,6 +25,7 @@ function verifyToken(req, res, next) {
     req.token = bearerToken
     jwt.verify(bearerToken, 'HPI_secretKey', (err, payload) => {
       if (err) {
+        console.log('token invalid')
         res.sendStatus(401)
       }
       else {
