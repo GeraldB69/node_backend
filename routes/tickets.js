@@ -6,41 +6,64 @@ const router = express.Router()
 const cors = require('cors');
 const connection = require('../helpers/db.js');
 const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken')
 
 
-router.use(cors());  
+router.use(cors());
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({
   extended: true
 }));
 
 
-  // GET //
-  
+
+function verifyToken(req, res, next) {
+  const bearerHeader = req.headers.authorization
+  if (typeof bearerHeader !== 'undefined') {
+    const bearer = bearerHeader.split(' ')
+    const bearerToken = bearer[1]
+    req.token = bearerToken
+    jwt.verify(bearerToken, 'HPI_secretKey', (err, payload) => {
+      if (err) {
+        res.sendStatus(401)
+      }
+      else {
+        req.user = payload
+        next()
+      }
+    })
+  } else {
+    res.sendStatus(403)
+  }
+}
+
+
+// GET //
+
 // Clic sur le lien envoyé par mail "?token=" [collab] UTILE ?
 router.get('/', (req, res) => {
   const token = req.query.token;
   const sql = 'SELECT id FROM users WHERE token = ?';
   connection.query(sql, [token], (error, response) => {
-    if (error) 
+    if (error)
       res.sendStatus(500);
-    else 
-      (response.length > 0) 
-      ? res.status(200).json({...response[0], token}) 
-      : res.status(404).send("Not Found");
+    else
+      (response.length > 0)
+        ? res.status(200).json({ ...response[0], token })
+        : res.status(404).send("Not Found");
   });
 })
 
 // Affichage de TOUS les tickets [psy]
-router.get('/all', (req, res) => {
+router.get('/all', verifyToken, (req, res) => {
   const sql = 'SELECT * FROM tickets';
   connection.query(sql, (error, response) => {
-    if (error) 
-    res.status(500).json(error);
-    else 
-    (response.length > 0) 
-    ? res.status(200).json(response) 
-    : res.status(404).send("Not Found");
+    if (error)
+      res.status(500).json(error);
+    else
+      (response.length > 0)
+        ? res.status(200).json(response)
+        : res.status(404).send("Not Found");
   });
 });
 
@@ -49,62 +72,63 @@ router.get('/:cid', (req, res) => {
   const collab_id = req.params.cid;
   const sql = 'SELECT * FROM tickets WHERE collab_id = ?';
   connection.query(sql, [collab_id], (error, response) => {
-    if (error) 
+    if (error)
       res.status(500).json(error);
-    else 
-      (response.length > 0) 
-      ? res.status(200).json(response) 
-      : res.status(404).send("Not Found");
+    else
+      (response.length > 0)
+        ? res.status(200).json(response)
+        : res.status(404).send("Not Found");
   });
 });
 
 // Affichage du ticket en cours d'un collaborateur [collab/psy]
 router.get('/:cid/pending', (req, res) => {
   const collab_cid = req.params.cid;
-  const sql = 
-    'SELECT * ' + 
-    'FROM tickets ' + 
-    'WHERE collab_id = ? ' + 
-    'AND ( ' + 
-      'state = "pending" OR ' + 
-      'state = "open")';
+  const sql =
+    'SELECT * ' +
+    'FROM tickets ' +
+    'WHERE collab_id = ? ' +
+    'AND ( ' +
+    'state = "pending" OR ' +
+    'state = "open")';
   connection.query(sql, [collab_id], (error, response) => {
-    if (error) 
+    if (error)
       res.status(500).json(error);
-    else 
-      (response.length > 0) 
-      ? res.status(200).json(response) 
-      : res.status(404).send("Not Found");
+    else
+      (response.length > 0)
+        ? res.status(200).json(response)
+        : res.status(404).send("Not Found");
   });
 });
 
 // Affichage des tickets cloturés d'un collaborateur [psy]
 router.get('/:cid/closed', (req, res) => {
   const collab_id = req.params.cid;
-  const sql = 
-    'SELECT * ' + 
-    'FROM tickets ' + 
-    'WHERE collab_id = ? ' + 
+  const sql =
+    'SELECT * ' +
+    'FROM tickets ' +
+    'WHERE collab_id = ? ' +
     'AND state = "closed"';
   connection.query(sql, [collab_id], (error, response) => {
-    if (error) 
+    if (error)
       res.status(500).json(error);
-    else 
-      (response.length > 0) 
-      ? res.status(200).json(response) 
-      : res.status(404).send("Not Found");  });
+    else
+      (response.length > 0)
+        ? res.status(200).json(response)
+        : res.status(404).send("Not Found");
+  });
 });
 
 // Affichage des tickets non colturés (!= closed) [psy]
 router.get('/pending', (req, res) => {
   const sql = 'SELECT * FROM tickets WHERE state != "closed"';
   connection.query(sql, (error, response) => {
-    if 
-    (error) res.status(500).json(error);
-    else 
-      (response.length > 0) 
-      ? res.status(200).json(response) 
-      : res.status(404).send("Not Found");
+    if
+      (error) res.status(500).json(error);
+    else
+      (response.length > 0)
+        ? res.status(200).json(response)
+        : res.status(404).send("Not Found");
   });
 });
 
@@ -113,35 +137,35 @@ router.get('/pending', (req, res) => {
 
 // Ouverture / poursuite d'un ticket (clic sur démarrer une conversation) [collab]
 router.post('/', (req, res) => {
-  
+
   // Infos envoyées par le client ({ id (collab), pseudo, token, message })
   const body = { ...req.body };
-  
+
   // Recherche du collaborateur (id) dans la table 'tickets' dont le ticket serait "en cours"
-  const waitingTickets = 
-    'SELECT * FROM test_hpi.users AS U ' + 
-    'INNER JOIN (SELECT id, state, channel, collab_id ' + 
-    'FROM test_hpi.tickets) AS T ' + 
-    'ON U.id = T.collab_id ' + 
-    'WHERE U.token = ? ' + 
-    'AND ( ' + 
-      'T.state = "pending" OR ' + 
-      'T.state = "open" OR ' + 
-      'T.state = "closed")';
+  const waitingTickets =
+    'SELECT * FROM test_hpi.users AS U ' +
+    'INNER JOIN (SELECT id, state, channel, collab_id ' +
+    'FROM test_hpi.tickets) AS T ' +
+    'ON U.id = T.collab_id ' +
+    'WHERE U.token = ? ' +
+    'AND ( ' +
+    'T.state = "pending" OR ' +
+    'T.state = "open" OR ' +
+    'T.state = "closed")';
   connection.query(waitingTickets, [body.token], (error, response) => {
     if (error) res.sendStatus(500);
     else if (response.length > 0 && response[0].status === "closed") {
       // Le collaborateur a déjà fait appel au psychologue mais son ticket a été fermé : il faut un nouveau ticket
-      const bodyNewTicket = { 
-        channel: newChannel(response[0].id), 
-        collab_id: response[0].id, 
+      const bodyNewTicket = {
+        channel: newChannel(response[0].id),
+        collab_id: response[0].id,
         pseudo: body.pseudo,
         state: "open"
       }
       const newTicket = 'INSERT INTO tickets SET ?';
       connection.query(newTicket, [bodyNewTicket], (error, response) => {
-        if (error) 
-        res.status(500).json(error)
+        if (error)
+          res.status(500).json(error)
         else {
           // Un nouveau ticket est crée
           // newOnChannel(bodyNewTicket.channel);
@@ -149,14 +173,14 @@ router.post('/', (req, res) => {
         }
       })
     } else if (
-      response.length > 0 && 
-      body.id === response[0].collab_id && 
+      response.length > 0 &&
+      body.id === response[0].collab_id &&
       (response[0].state === "pending" || response[0].state === "open")) {
       // Le token est en attente et l'id correspond => update
       const collab = { ...response[0], pseudo: body.pseudo } // toutes les infos ici
       const update = 'UPDATE tickets SET ? WHERE id = ?';
       connection.query(update, [{ pseudo: collab.pseudo }, collab.id], (error, response) => {
-        if (error) 
+        if (error)
           res.sendStatus(500);
         else {
           // newOnChannel(collab.channel);
@@ -172,20 +196,20 @@ router.post('/', (req, res) => {
       // Le token est-il dans la BDD ?
       const test = 'SELECT id FROM users WHERE token = ? ';
       connection.query(test, [body.token], (error, response) => {
-        if (error) 
-        res.sendStatus(500);
+        if (error)
+          res.sendStatus(500);
         else if (response.length > 0 && response[0].id === body.id) {
           // Le token est dans la BDD : on prépare le nouveau ticket + nouveau channel
-          const bodyNewTicket = { 
-            channel: newChannel(response[0].id), 
-            collab_id: response[0].id, 
+          const bodyNewTicket = {
+            channel: newChannel(response[0].id),
+            collab_id: response[0].id,
             pseudo: body.pseudo,
             state: "open"
           }
           const newTicket = 'INSERT INTO tickets SET ?';
           connection.query(newTicket, [bodyNewTicket], (error, response) => {
-            if (error) 
-            res.status(500).json(error)
+            if (error)
+              res.status(500).json(error)
             else {
               // Token et id vérifiés : un nouveau ticket est crée
               // newOnChannel(bodyNewTicket.channel);
@@ -193,9 +217,9 @@ router.post('/', (req, res) => {
             }
           })
         }
-        else 
+        else
           // Le token n'existe pas et/ou l'id ne correspond pas
-          res.status(404).send({ bad_token: body.token});
+          res.status(404).send({ bad_token: body.token });
       })
     }
   });
