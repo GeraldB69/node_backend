@@ -24,7 +24,7 @@ router.use(bodyParser.urlencoded({
 router.get('/', (req, res, next) => {
   const collabId = req.query.cid;
   if (collabId) {
-    console.log("messages-cid: ", collabId)
+    // console.log("messages-cid: ", collabId)
     const sql = 
       'SELECT * FROM test_hpi.messages AS M ' +
       'INNER JOIN (SELECT * ' +
@@ -37,7 +37,7 @@ router.get('/', (req, res, next) => {
       else 
         (response.length > 0) 
         ? res.status(200).json(response) 
-        : res.status(404).send("Not Found");
+        : res.status(204).send("No Content");
     });
   } else next();
 })
@@ -47,12 +47,15 @@ router.get('/', (req, res, next) => {
 router.get('/', (req, res, next) => {
   const channelId = req.query.chid;
   if (channelId) {
-    console.log("messages-chid: ", req)
+    // console.log("messages-chid: ", req)
     const sql =   
       'SELECT * FROM test_hpi.messages AS M ' + 
       'INNER JOIN (SELECT * ' + 
       'FROM test_hpi.tickets) AS T ' + 
-      'ON T.id = M.tickets_id ' + 
+      'INNER JOIN (SELECT id, firstname, lastname, role ' + 
+      'FROM test_hpi.users) AS U ' + 
+      'ON (T.id = M.tickets_id ' + 
+      'AND M.sender_id = U.id) ' + 
       'WHERE T.channel = ? ' + 
       'ORDER BY M.timestamp ASC ';
     connection.query(sql, [channelId], (error, response) => {
@@ -61,7 +64,7 @@ router.get('/', (req, res, next) => {
       else 
         (response.length > 0) 
         ? res.status(200).json(response) 
-        : res.status(404).send("Not Found");
+        : res.status(204).send("No Content");
     });
   } else next();
 })
