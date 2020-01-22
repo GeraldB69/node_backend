@@ -14,11 +14,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+app.use((req,res,next)=>{
+  console.log(req.method," ",req.originalUrl)
+  next()
+})
 
 // Récupérer les infos qui passent...
 app.use((req, res, next) => {
   const infos = { ...req.body }
-  console.log("21. req.body:", infos);
+  // console.log("21. req.body:", infos);
   next();
 });
 
