@@ -53,23 +53,21 @@ io.on('connection', function (socket) {
   socket.on("message", function (objet) {
     // objet = { message: message, user: this.state.user, channel: this.channel }
 
-    console.log("message:", objet)
     const body = { 
       message: objet.message,
       sender_id: objet.sender_id,
-      tickets_id: objet.ticket_id
+      tickets_id: objet.tickets_id
     }
     const newMessageSql = 'INSERT INTO messages SET ? ';
-    (req,res) => connection.query(newMessageSql, [body], (error, response) => {
+    connection.query(newMessageSql, [body], (error, response) => {
       if (error) 
         // res.status(500).json(error)
-        console.log(error)
+        console.log("error:", error)
       else {
-        console.log(response)
+        console.log("index.js / new post:", response)
       }
     })
-      // const { body } = req
-    
+    // const { body } = req
     io.to((objet.channel)).emit('waiting room', objet)
 
   })

@@ -141,17 +141,17 @@ router.post('/', (req, res) => {
 
       // Le token est "en cours" et l'id correspond => update
       const collab = { ...response[0], pseudo: body.pseudo } // toutes les infos ici
-      console.log("collab",collab)
       const update = 'UPDATE tickets SET ? WHERE id = ?';
       connection.query(update, [{ pseudo: collab.pseudo }, collab.id], (error, response) => {
         if (error) res.sendStatus(500);
         else {
+          console.log("ticket.js / update token:")
           newOnChannel(collab.channel, body.id);
           res.status(201).send({ 
             id: body.id, 
             channel: collab.channel, 
             pseudo: body.pseudo,
-            ticket_id: collab.id 
+            tickets_id: collab.id 
           })
         }
       })
@@ -172,6 +172,7 @@ router.post('/', (req, res) => {
 
         if (error) res.status(500).json(error)
         else {
+          console.log("ticket.js / ticket cloturé => new token:", response)
           newOnChannel(bodyNewTicket.channel, body.id);
           res.sendStatus(201);
         }
@@ -196,6 +197,7 @@ router.post('/', (req, res) => {
         else if (response.length > 0 && response[0].id.toString() === body.id.toString()) {
 
           // Le token est dans la BDD => nouveau ticket + nouveau channel
+          console.log("Token OK")
           const bodyNewTicket = {
             channel: newChannel(response[0].id),
             collab_id: response[0].id,
@@ -206,9 +208,9 @@ router.post('/', (req, res) => {
           connection.query(newTicket, [bodyNewTicket], (error, response) => {
             if (error) res.status(500).json(error)
             else {
-              console.log("response", response)
-
+              
               // Token et id vérifiés : un nouveau ticket est crée
+              console.log("ticket.js / nouveau token:", response)
               newOnChannel(bodyNewTicket.channel);
               res.sendStatus(201);
             }
