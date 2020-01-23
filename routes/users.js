@@ -63,7 +63,7 @@ router.post('/auth/admin', (req, res) => {
             username,
             userId 
           })
-        })
+        }) 
       } else {
         console.log("Mot de passe invalide")
         res.status(401).json({ message: "Mot de passe invalide" })
