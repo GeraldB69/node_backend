@@ -2,10 +2,13 @@
 const app = require('express')();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+const connection = require('./helpers/db.js');
 const bodyParser = require('body-parser');
 const router = require('./routes');
 const cors = require('cors');
 const port = 4000;
+
+const sendMessage = require('./routes/messages');
 
 // Configuration de l'application
 // const connection = require('./helpers/db.js');
@@ -43,13 +46,30 @@ io.on('connection', function (socket) {
   socket.on('leave room', object => {
     socket = io.sockets.connected[object.clientId]
     socket.leave(object.channel, () => {
-      console.log("socket has leaved room", socket.id);
+      console.log(`${socket.id} has leaved room ${object.channel}`);
     })   
   })
 
   socket.on("message", function (objet) {
-    console.log("message:", objet.message)
+    // objet = { message: message, user: this.state.user, channel: this.channel }
+
+    const body = { 
+      message: objet.message,
+      sender_id: objet.sender_id,
+      tickets_id: objet.tickets_id
+    }
+    const newMessageSql = 'INSERT INTO messages SET ? ';
+    connection.query(newMessageSql, [body], (error, response) => {
+      if (error) 
+        // res.status(500).json(error)
+        console.log("error:", error)
+      else {
+        console.log("index.js / new post:", response)
+      }
+    })
+    // const { body } = req
     io.to((objet.channel)).emit('waiting room', objet)
+
   })
 
   socket.on('disconnect', function (t) {

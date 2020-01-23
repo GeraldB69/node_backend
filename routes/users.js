@@ -61,7 +61,7 @@ router.post('/auth/admin', (req, res) => {
           res.status(200).json({
             token,
             username,
-            userId 
+            id: user.id
           })
         }) 
       } else {
