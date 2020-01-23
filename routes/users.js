@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const verifyToken = require('../helpers/verifyToken')
 
 const connection = require('../helpers/db.js');
 
@@ -43,7 +44,7 @@ router.get('/psy_off', (req, res) => {
   })
 })
 
-// GET //
+// POST //
 
 router.post('/auth/admin', (req, res) => {
   const id = req.body.data
@@ -55,13 +56,14 @@ router.post('/auth/admin', (req, res) => {
         console.log('Identification OK')
         user = response[0]
         username = `${user.firstname} ${user.lastname}`
+        userId = user.id
         jwt.sign({ user }, 'HPI_secretKey', (err, token) => {
           res.status(200).json({
             token,
             username,
             id: user.id
           })
-        })
+        }) 
       } else {
         console.log("Mot de passe invalide")
         res.status(401).json({ message: "Mot de passe invalide" })
@@ -71,6 +73,20 @@ router.post('/auth/admin', (req, res) => {
       res.status(401).json({ message: "Email invalide" })
     }
   })
+})
+
+// PUT //
+router.put('/auth/admin/:pid', verifyToken,(req, res)=>{
+  psyId = req.params.pid
+  role = req.body 
+  connection.query('UPDATE users SET ? WHERE id = ?', [role, psyId], (error, result)=>{
+    if (error) {
+      console.log(error)
+      res.status(500).json({flash: error.message})
+    } else {
+      res.status(200).json({flash: 'status updated'})
+    }
+  }) 
 })
 
 
