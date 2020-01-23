@@ -58,7 +58,8 @@ router.post('/auth/admin', (req, res) => {
         jwt.sign({ user }, 'HPI_secretKey', (err, token) => {
           res.status(200).json({
             token,
-            username
+            username,
+            id: user.id
           })
         })
       } else {
