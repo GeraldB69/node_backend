@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const verifyToken = require('../helpers/verifyToken')
 
 const connection = require('../helpers/db.js');
 
@@ -43,7 +44,7 @@ router.get('/psy_off', (req, res) => {
   })
 })
 
-// GET //
+// POST //
 
 router.post('/auth/admin', (req, res) => {
   const id = req.body.data
@@ -55,10 +56,12 @@ router.post('/auth/admin', (req, res) => {
         console.log('Identification OK')
         user = response[0]
         username = `${user.firstname} ${user.lastname}`
+        userId = user.id
         jwt.sign({ user }, 'HPI_secretKey', (err, token) => {
           res.status(200).json({
             token,
-            username
+            username,
+            userId 
           })
         })
       } else {
