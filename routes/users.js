@@ -72,5 +72,19 @@ router.post('/auth/admin', (req, res) => {
   })
 })
 
+// PUT //
+router.put('/auth/admin/:pid', verifyToken,(req, res)=>{
+  psyId = req.params.pid
+  role = req.body 
+  connection.query('UPDATE users SET ? WHERE id = ?', [role, psyId], (error, result)=>{
+    if (error) {
+      console.log(error)
+      res.status(500).json({flash: error.message})
+    } else {
+      res.status(200).json({flash: 'status updated'})
+    }
+  }) 
+})
+
 
 module.exports = router;
