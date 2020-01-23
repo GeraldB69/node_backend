@@ -16,10 +16,6 @@ router.use(bodyParser.urlencoded({
 }));
 
 
-
-
-
-
 // GET //
 
 // Clic sur le lien envoyé par mail "?token=" [collab] UTILE ?
@@ -133,11 +129,38 @@ router.post('/', (req, res) => {
     'AND ( ' +
     'T.state = "pending" OR ' +
     'T.state = "open" OR ' +
-    'T.state = "closed")';
+    'T.state = "closed") ' +
+    'ORDER BY T.state DESC';
   connection.query(waitingTickets, [body.token], (error, response) => {
     if (error) res.sendStatus(500);
+
+    else if (
+      response.length > 0 &&
+      body.id.toString() === response[0].collab_id.toString() &&
+      (response[0].state === "pending" || response[0].state === "open")) {
+
+      // Le token est "en cours" et l'id correspond => update
+      const collab = { ...response[0], pseudo: body.pseudo } // toutes les infos ici
+      const update = 'UPDATE tickets SET ? WHERE id = ?';
+      connection.query(update, [{ pseudo: collab.pseudo }, collab.id], (error, response) => {
+        if (error) res.sendStatus(500);
+        else {
+          console.log("ticket.js / update token:")
+          newOnChannel(collab.channel, body.id);
+          res.status(201).send({ 
+            id: body.id, 
+            channel: collab.channel, 
+            pseudo: body.pseudo,
+            tickets_id: collab.id 
+          })
+        }
+      })
+    } 
+
     else if (response.length > 0 && response[0].status === "closed") {
-      // Le collaborateur a déjà fait appel au psychologue mais son ticket a été fermé : il faut un nouveau ticket
+
+      // Le collaborateur a déjà fait appel au psychologue mais son ticket a été cloturé => nouveau ticket
+      console.log("closed", response[0])
       const bodyNewTicket = {
         channel: newChannel(response[0].id),
         collab_id: response[0].id,
@@ -146,42 +169,35 @@ router.post('/', (req, res) => {
       }
       const newTicket = 'INSERT INTO tickets SET ?';
       connection.query(newTicket, [bodyNewTicket], (error, response) => {
-        if (error)
-          res.status(500).json(error)
+
+        if (error) res.status(500).json(error)
         else {
-          // Un nouveau ticket est crée
-          // newOnChannel(bodyNewTicket.channel);
+          console.log("ticket.js / ticket cloturé => new token:", response)
+          newOnChannel(bodyNewTicket.channel, body.id);
           res.sendStatus(201);
         }
       })
-    } else if (
-      response.length > 0 &&
-      body.id === response[0].collab_id &&
-      (response[0].state === "pending" || response[0].state === "open")) {
-      // Le token est en attente et l'id correspond => update
-      const collab = { ...response[0], pseudo: body.pseudo } // toutes les infos ici
-      const update = 'UPDATE tickets SET ? WHERE id = ?';
-      connection.query(update, [{ pseudo: collab.pseudo }, collab.id], (error, response) => {
-        if (error)
-          res.sendStatus(500);
-        else {
-          // newOnChannel(collab.channel);
-          res.status(201).send({ id: body.id, channel: collab.channel, pseudo: body.pseudo })
-        }
-      })
-    } else if (response.length > 0 && body.id !== response[0].collab_id) {
+    }
+
+    else if (response.length > 0 && body.id.toString() !== response[0].collab_id.toString()) {
+
       // Le token existe mais id différents
       res.sendStatus(404);
     } else {
-      // Le ticket n'existe pas du tout ou pas de ticket en cours
-      console.log(`No Pending Ticket (id: ${body.id})`)  // 789/xxx = OK
+
+      // Le ticket n'existe pas du tout ou pas de ticket en cours => nouveau ticket
+      console.log(`No Pending Ticket (id: ${body.id})`)
+
       // Le token est-il dans la BDD ?
-      const test = 'SELECT id FROM users WHERE token = ? ';
-      connection.query(test, [body.token], (error, response) => {
-        if (error)
-          res.sendStatus(500);
-        else if (response.length > 0 && response[0].id === body.id) {
-          // Le token est dans la BDD : on prépare le nouveau ticket + nouveau channel
+      const checkToken = 'SELECT id FROM users WHERE token = ? ';
+      connection.query(checkToken, [body.token], (error, response) => {
+        console.log("ici", response, body)
+
+        if (error) res.sendStatus(500);
+        else if (response.length > 0 && response[0].id.toString() === body.id.toString()) {
+
+          // Le token est dans la BDD => nouveau ticket + nouveau channel
+          console.log("Token OK")
           const bodyNewTicket = {
             channel: newChannel(response[0].id),
             collab_id: response[0].id,
@@ -190,16 +206,18 @@ router.post('/', (req, res) => {
           }
           const newTicket = 'INSERT INTO tickets SET ?';
           connection.query(newTicket, [bodyNewTicket], (error, response) => {
-            if (error)
-              res.status(500).json(error)
+            if (error) res.status(500).json(error)
             else {
+              
               // Token et id vérifiés : un nouveau ticket est crée
-              // newOnChannel(bodyNewTicket.channel);
+              console.log("ticket.js / nouveau token:", response)
+              newOnChannel(bodyNewTicket.channel);
               res.sendStatus(201);
             }
           })
         }
         else
+
           // Le token n'existe pas et/ou l'id ne correspond pas
           res.status(404).send({ bad_token: body.token });
       })
@@ -216,8 +234,10 @@ newChannel = (id) => {
 }
 
 // Socket.io
-newOnChannel = (channel) => {
-  io.to(channel).emit('waiting room', console.log("New user on channel", channel))
+newOnChannel = (channel, id) => {
+  io.to(channel).emit('waiting room', console.log(`New user (id: ${id}) on channel ${channel}`))
+  // io.to(channel).emit('waiting room', console.log(`New user (id: ${id}) on channel ${channel}`))
+  // Ajout d'une notification ici pour les psy ?
 }
 
 

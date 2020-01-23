@@ -76,6 +76,10 @@ router.get('/', (req, res, next) => {
 // POST //
 
 // Un utilisateur envoie un message sur un channel
+  // router.post('/', (req, res) => {
+  //   const { body } = req
+  //   console.log(req);
+  // })
 
 
 module.exports = router;
