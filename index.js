@@ -1,5 +1,6 @@
 // Déclaration des librairies
-const app = require('express')();
+const exp = require('express');
+const app = exp();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const connection = require('./helpers/db.js');
@@ -8,10 +9,9 @@ const router = require('./routes');
 const cors = require('cors');
 const port = 4000;
 
-const sendMessage = require('./routes/messages');
 
 // Configuration de l'application
-// const connection = require('./helpers/db.js');
+// app.use('/', exp.static('../lyon-sept19-projet3-groupehpi-front/build'));
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -22,15 +22,8 @@ app.use((req,res,next)=>{
   next()
 })
 
-// Récupérer les infos qui passent...
-app.use((req, res, next) => {
-  const infos = { ...req.body }
-  // console.log("21. req.body:", infos);
-  next();
-});
-
 // Router
-app.use('/', router);
+app.use('/api', router);
 
 // Socket.io
 io.on('connection', function (socket) {
@@ -64,7 +57,7 @@ io.on('connection', function (socket) {
         // res.status(500).json(error)
         console.log("error:", error)
       else {
-        console.log("index.js / new post:", response)
+        console.log(`index.js / New message with ID ${response.insertId} `)
       }
     })
     // const { body } = req
