@@ -2,6 +2,7 @@
 const app = require('express')();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+global.io = io; //added
 const connection = require('./helpers/db.js');
 const bodyParser = require('body-parser');
 const router = require('./routes');

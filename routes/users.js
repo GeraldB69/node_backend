@@ -95,6 +95,7 @@ router.put('/auth/admin/:pid', verifyToken,(req, res)=>{
       console.log(error)
       res.status(500).json({flash: error.message})
     } else {
+      global.io.emit('psychologues')
       res.status(200).json({flash: 'status updated'})
     }
   }) 

@@ -223,6 +223,7 @@ router.post('/', (req, res) => {
       })
     }
   });
+  global.io.emit('tickets')
 });
 
 // Fonctions annexes // 
