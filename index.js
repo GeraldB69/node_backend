@@ -43,12 +43,12 @@ io.on('connection', function (socket) {
     })
     io.to((socket.id)).emit('waiting room', socket.id)
   })
-
+  
   socket.on('leave room', object => {
     socket = io.sockets.connected[object.clientId]
     socket.leave(object.channel, () => {
       console.log(`${socket.id} has leaved room ${object.channel}`);
-    })   
+    })
   })
 
   socket.on("message", function (objet) {
