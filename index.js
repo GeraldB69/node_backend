@@ -31,38 +31,30 @@ io.on('connection', function (socket) {
   console.log('a user connected', socket.id)
 
   socket.on('waiting room', function (id) {
-      socket.join(id, () => {
-        console.log("socket has joined the waiting room", socket.id);
-      })
-      io.to((socket.id)).emit('waiting room', socket.id)
+    socket.join(id, () => {
+      console.log("socket has joined the waiting room", socket.id);
+    })
+    io.to((socket.id)).emit('waiting room', socket.id)
   })
-  
+
   socket.on('leave room', object => {
-  socket = io.sockets.connected[object.clientId]
-  socket.leave(object.channel, () => {
-    console.log(`${socket.id} has leaved room ${object.channel}`);
+    socket = io.sockets.connected[object.clientId]
+    socket.leave(object.channel, () => {
+      console.log(`${socket.id} has leaved room ${object.channel}`);
+    })
   })
-})
 
   socket.on("message", function (objet) {
-  // objet = { message: message, user: this.state.user, channel: this.channel }
+    // objet = { message: message, user: this.state.user, channel: this.channel }
 
-  const body = {
-    message: objet.message,
-    sender_id: objet.sender_id,
-    tickets_id: objet.tickets_id
-  }
-  const newMessageSql = 'INSERT INTO messages SET ? ';
-  connection.query(newMessageSql, [body], (error, response) => {
-    if (error)
-      // res.status(500).json(error)
-      console.log("error:", error)
-    else {
-      console.log("index.js / new post:", response)
+    const body = {
+      message: objet.message,
+      sender_id: objet.sender_id,
+      tickets_id: objet.tickets_id
     }
     const newMessageSql = 'INSERT INTO messages SET ? ';
     connection.query(newMessageSql, [body], (error, response) => {
-      if (error) 
+      if (error)
         // res.status(500).json(error)
         console.log("error:", error)
       else {
@@ -71,15 +63,11 @@ io.on('connection', function (socket) {
     })
     // const { body } = req
     io.to((objet.channel)).emit('waiting room', objet)
-
   })
-  // const { body } = req
-  io.to((objet.channel)).emit('waiting room', objet)
-})
 
   socket.on('disconnect', function (t) {
-  console.log("disconnect")
-});
+    console.log("disconnect")
+  });
 });
 
 // Test de l'API
