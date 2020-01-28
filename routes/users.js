@@ -8,6 +8,17 @@ const connection = require('../helpers/db.js');
 
 // GET // 
 
+// liste de tous les pyschologues
+router.get('/psy/all', verifyToken, (req, res) => {
+  const sql = "SELECT * FROM users WHERE role LIKE 'psy%'";
+  connection.query(sql, (error, response) => {
+    if (error)
+      res.status(500).json(error);
+    else
+      res.status(200).json(response)
+  })
+})
+
 // Compteur des psychologues dispo. (role = 'psy_online')
 router.get('/psy_on', (req, res) => {
   const status = 'psy_online';
@@ -84,6 +95,7 @@ router.put('/auth/admin/:pid', verifyToken,(req, res)=>{
       console.log(error)
       res.status(500).json({flash: error.message})
     } else {
+      global.io.emit('psychologues')
       res.status(200).json({flash: 'status updated'})
     }
   }) 

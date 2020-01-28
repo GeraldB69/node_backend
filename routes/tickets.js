@@ -18,7 +18,7 @@ router.use(bodyParser.urlencoded({
 
 // GET //
 
-// Clic sur le lien envoyé par mail "?token=" [collab] UTILE ?
+// Clic sur le lien envoyé par mail "?token=" [collab]
 router.get('/', (req, res) => {
   const token = req.query.token;
   const sql = 'SELECT id FROM users WHERE token = ?';
@@ -90,6 +90,19 @@ router.get('/:cid/closed', (req, res) => {
   connection.query(sql, [collab_id], (error, response) => {
     if (error)
       res.status(500).json(error);
+    else
+      (response.length > 0)
+        ? res.status(200).json(response)
+        : res.status(404).send("Not Found");
+  });
+});
+
+// Affichage des tickets colturés (= closed) [psy]
+router.get('/closed', (req, res) => {
+  const sql = 'SELECT * FROM tickets WHERE state = "closed"';
+  connection.query(sql, (error, response) => {
+    if
+      (error) res.status(500).json(error);
     else
       (response.length > 0)
         ? res.status(200).json(response)
@@ -223,7 +236,24 @@ router.post('/', (req, res) => {
       })
     }
   });
+  global.io.emit('tickets')
 });
+
+
+// PUT //
+router.put('/state/:tid', verifyToken,(req, res)=>{
+  ticketId = req.params.tid
+  body = req.body 
+  connection.query('UPDATE tickets SET ? WHERE id = ?', [body, ticketId], (error, result)=>{
+    if (error) {
+      console.log(error)
+      res.status(500).json({flash: error.message})
+    } else {
+      global.io.emit('tickets')
+      res.status(200).json({flash: 'status updated'})
+    }
+  }) 
+})
 
 // Fonctions annexes // 
 
