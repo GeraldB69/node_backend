@@ -236,7 +236,24 @@ router.post('/', (req, res) => {
       })
     }
   });
+  global.io.emit('tickets')
 });
+
+
+// PUT //
+router.put('/state/:tid', verifyToken,(req, res)=>{
+  ticketId = req.params.tid
+  body = req.body 
+  connection.query('UPDATE tickets SET ? WHERE id = ?', [body, ticketId], (error, result)=>{
+    if (error) {
+      console.log(error)
+      res.status(500).json({flash: error.message})
+    } else {
+      global.io.emit('tickets')
+      res.status(200).json({flash: 'status updated'})
+    }
+  }) 
+})
 
 // Fonctions annexes // 
 
