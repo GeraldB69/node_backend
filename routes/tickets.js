@@ -97,6 +97,19 @@ router.get('/:cid/closed', (req, res) => {
   });
 });
 
+// Affichage des tickets colturés (= closed) [psy]
+router.get('/closed', (req, res) => {
+  const sql = 'SELECT * FROM tickets WHERE state = "closed"';
+  connection.query(sql, (error, response) => {
+    if
+      (error) res.status(500).json(error);
+    else
+      (response.length > 0)
+        ? res.status(200).json(response)
+        : res.status(404).send("Not Found");
+  });
+});
+
 // Affichage des tickets non colturés (!= closed) [psy]
 router.get('/pending', (req, res) => {
   const sql = 'SELECT * FROM tickets WHERE state != "closed"';
