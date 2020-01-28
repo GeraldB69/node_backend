@@ -18,7 +18,7 @@ router.use(bodyParser.urlencoded({
 
 // GET //
 
-// Clic sur le lien envoyé par mail "?token=" [collab] UTILE ?
+// Clic sur le lien envoyé par mail "?token=" [collab]
 router.get('/', (req, res) => {
   const token = req.query.token;
   const sql = 'SELECT id FROM users WHERE token = ?';
