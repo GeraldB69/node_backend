@@ -13,12 +13,6 @@ router.use(bodyParser.urlencoded({
 
 // GET //
 
-// Affichage de tous les messages (superviseur) + AUTH à rajouter plus tard [superviseur]
-// '/all'
-
-// Affichage de tous les messages d'un Psychologue (cloturés/non cloturés) 
-// '?pid='
-
 // Affichage des messages d'un Collaborateur en particulier
 // '?cid='
 router.get('/', (req, res, next) => {
@@ -52,7 +46,7 @@ router.get('/', (req, res, next) => {
       'SELECT * FROM test_hpi.messages AS M ' + 
       'INNER JOIN (SELECT * ' + 
       'FROM test_hpi.tickets) AS T ' + 
-      'INNER JOIN (SELECT id, firstname, lastname, role ' + 
+      'INNER JOIN (SELECT id, CONCAT(firstname, " ", lastname) AS user, role ' + 
       'FROM test_hpi.users) AS U ' + 
       'ON (T.id = M.tickets_id ' + 
       'AND M.sender_id = U.id) ' + 
@@ -68,18 +62,5 @@ router.get('/', (req, res, next) => {
     });
   } else next();
 })
-
-
-// Mix des 2 ?
-
-
-// POST //
-
-// Un utilisateur envoie un message sur un channel
-  // router.post('/', (req, res) => {
-  //   const { body } = req
-  //   console.log(req);
-  // })
-
 
 module.exports = router;
