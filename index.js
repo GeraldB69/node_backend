@@ -52,16 +52,17 @@ io.on('connection', function (socket) {
       sender_id: objet.sender_id,
       tickets_id: objet.tickets_id
     }
-    const newMessageSql = 'INSERT INTO messages SET ? ';
-    connection.query(newMessageSql, [body], (error, response) => {
-      if (error)
-        // res.status(500).json(error)
-        console.log("error:", error)
-      else {
-        console.log(`index.js / New message with ID ${response.insertId} `)
-      }
-    })
-    // const { body } = req
+    if (objet.sender_id > 0) {
+      const newMessageSql = 'INSERT INTO messages SET ? ';
+      connection.query(newMessageSql, [body], (error, response) => {
+        if (error)
+          // res.status(500).json(error)
+          console.log("error:", error)
+        else {
+          console.log(`index.js / New message with ID ${response.insertId} `)
+        }
+      })
+    }
     io.to((objet.channel)).emit('waiting room', objet)
   })
 
