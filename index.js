@@ -55,10 +55,11 @@ io.on('connection', function (socket) {
     }
     if (objet.sender_id > 0) {
       const newMessageSql = 'INSERT INTO messages SET ? ';
+      console.log("objet", objet)
       connection.query(newMessageSql, [body], (error, response) => {
         if (error)
-          // res.status(500).json(error)
-          console.log("error:", error)
+        console.log("error:", error)
+        // res.status(500).json(error)
         else {
           console.log(`index.js / New message with ID ${response.insertId} `)
         }
