@@ -2,14 +2,19 @@
 const exp = require('express');
 const app = exp();
 const server = require('http').Server(app);
+const https = require('https');
 const io = require('socket.io')(server);
 global.io = io; //added
-const connection = require('./helpers/db.js');
+const helpers = require('./helpers/db.js');
 const bodyParser = require('body-parser');
 const router = require('./routes');
 const cors = require('cors');
-let port = 4000;
-// port = 80; // Cas du VPS
+const fs = require('fs');
+
+// true si VPS
+const isOnline = false;
+
+const port = (isOnline) ? 80 : 4000;
 
 
 // Configuration de l'application
@@ -56,7 +61,7 @@ io.on('connection', function (socket) {
     if (objet.sender_id > 0) {
       const newMessageSql = 'INSERT INTO messages SET ? ';
       console.log("objet", objet)
-      connection.query(newMessageSql, [body], (error, response) => {
+      helpers.connection.query(newMessageSql, [body], (error, response) => {
         if (error)
         console.log("error:", error)
         // res.status(500).json(error)
@@ -87,10 +92,24 @@ app.use(function (req, res, next) {
   next(err);
 });
 
-// Lancement du serveur
+
+// Serveur http
 server.listen(port, (err) => {
   if (err) {
     throw new Error('Something bad happened...');
   }
-  console.log('Listening on port ' + server.address().port);
+  console.log('http server listen on port ' + server.address().port);
 });
+
+// Serveur https
+if (isOnline) {
+  const httpsOptions = {
+    key: fs.readFileSync(`${helpers.httpsPath}/privkey.pem`),
+    cert: fs.readFileSync(`${helpers.httpsPath}/cert.pem`),
+    ca: fs.readFileSync(`${helpers.httpsPath}/chain.pem`),
+  }
+  const httpsServer = https.createServer(httpsOptions, app);
+  httpsServer.listen(443, () => {
+    console.log(`https server listen on port ${httpsServer.address().port}`);
+  });
+}

@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const verifyToken = require('../helpers/verifyToken')
 
-const connection = require('../helpers/db.js');
+const helpers = require('../helpers/db.js');
 
 
 // GET // 
@@ -11,7 +11,7 @@ const connection = require('../helpers/db.js');
 // liste de tous les pyschologues
 router.get('/psy/all', verifyToken, (req, res) => {
   const sql = "SELECT * FROM users WHERE role LIKE 'psy%'";
-  connection.query(sql, (error, response) => {
+  helpers.connection.query(sql, (error, response) => {
     if (error)
       res.status(500).json(error);
     else
@@ -23,7 +23,7 @@ router.get('/psy/all', verifyToken, (req, res) => {
 router.get('/psy_on', (req, res) => {
   const status = 'psy_online';
   const sql = 'SELECT id FROM users WHERE role = ?';
-  connection.query(sql, [status], (error, response) => {
+  helpers.connection.query(sql, [status], (error, response) => {
     if (error)
       res.status(500).json(error);
     else
@@ -35,7 +35,7 @@ router.get('/psy_on', (req, res) => {
 router.get('/psy_busy', (req, res) => {
   const status = 'psy_busy';
   const sql = 'SELECT id FROM users WHERE role = ?';
-  connection.query(sql, [status], (error, response) => {
+  helpers.connection.query(sql, [status], (error, response) => {
     if (error)
       res.status(500).json(error);
     else
@@ -47,7 +47,7 @@ router.get('/psy_busy', (req, res) => {
 router.get('/psy_off', (req, res) => {
   const status = 'psy_offline';
   const sql = 'SELECT id FROM users WHERE role = ?';
-  connection.query(sql, [status], (error, response) => {
+  helpers.connection.query(sql, [status], (error, response) => {
     if (error)
       res.status(500).json(error);
     else
@@ -59,7 +59,7 @@ router.get('/psy_off', (req, res) => {
 
 router.post('/auth/admin', (req, res) => {
   const id = req.body.data
-  connection.query('SELECT * FROM users WHERE email = ?', [id.email], (error, response) => {
+  helpers.connection.query('SELECT * FROM users WHERE email = ?', [id.email], (error, response) => {
     if (error)
       res.status(500).json(error);
     else if (response.length > 0) {
@@ -90,7 +90,7 @@ router.post('/auth/admin', (req, res) => {
 router.put('/auth/admin/:pid', verifyToken,(req, res)=>{
   psyId = req.params.pid
   role = req.body 
-  connection.query('UPDATE users SET ? WHERE id = ?', [role, psyId], (error, result)=>{
+  helpers.connection.query('UPDATE users SET ? WHERE id = ?', [role, psyId], (error, result)=>{
     if (error) {
       console.log(error)
       res.status(500).json({flash: error.message})

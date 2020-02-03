@@ -4,7 +4,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const router = express.Router()
 const cors = require('cors');
-const connection = require('../helpers/db.js');
+const helpers = require('../helpers/db.js');
 const bodyParser = require('body-parser');
 const verifyToken = require('../helpers/verifyToken')
 
@@ -22,7 +22,7 @@ router.use(bodyParser.urlencoded({
 router.get('/', (req, res) => {
   const token = req.query.token;
   const sql = 'SELECT id FROM users WHERE token = ?';
-  connection.query(sql, [token], (error, response) => {
+  helpers.connection.query(sql, [token], (error, response) => {
     console.log("26-response", response)
     if (error)
       res.sendStatus(500);
@@ -36,7 +36,7 @@ router.get('/', (req, res) => {
 // Affichage de TOUS les tickets [psy]
 router.get('/all', verifyToken, (req, res) => {
   const sql = 'SELECT * FROM tickets';
-  connection.query(sql, (error, response) => {
+  helpers.connection.query(sql, (error, response) => {
     console.log("40-response", response)
     if (error)
       console.log("42-error", error)
@@ -52,7 +52,7 @@ router.get('/all', verifyToken, (req, res) => {
 router.get('/:cid', (req, res) => {
   const collab_id = req.params.cid;
   const sql = 'SELECT * FROM tickets WHERE collab_id = ?';
-  connection.query(sql, [collab_id], (error, response) => {
+  helpers.connection.query(sql, [collab_id], (error, response) => {
     if (error)
       res.status(500).json(error);
     else
@@ -72,7 +72,7 @@ router.get('/:cid/pending', (req, res) => {
     'AND ( ' +
     'state = "pending" OR ' +
     'state = "open")';
-  connection.query(sql, [collab_id], (error, response) => {
+  helpers.connection.query(sql, [collab_id], (error, response) => {
     if (error)
       res.status(500).json(error);
     else
@@ -90,7 +90,7 @@ router.get('/:cid/closed', (req, res) => {
     'FROM tickets ' +
     'WHERE collab_id = ? ' +
     'AND state = "closed"';
-  connection.query(sql, [collab_id], (error, response) => {
+  helpers.connection.query(sql, [collab_id], (error, response) => {
     if (error)
       res.status(500).json(error);
     else
@@ -103,7 +103,7 @@ router.get('/:cid/closed', (req, res) => {
 // Affichage des tickets colturés (= closed) [psy]
 router.get('/closed', (req, res) => {
   const sql = 'SELECT * FROM tickets WHERE state = "closed"';
-  connection.query(sql, (error, response) => {
+  helpers.connection.query(sql, (error, response) => {
     if
       (error) res.status(500).json(error);
     else
@@ -116,7 +116,7 @@ router.get('/closed', (req, res) => {
 // Affichage des tickets non colturés (!= closed) [psy]
 router.get('/pending', (req, res) => {
   const sql = 'SELECT * FROM tickets WHERE state != "closed"';
-  connection.query(sql, (error, response) => {
+  helpers.connection.query(sql, (error, response) => {
     if
       (error) res.status(500).json(error);
     else
@@ -148,7 +148,7 @@ router.post('/', (req, res) => {
     'T.state = "open" OR ' +
     'T.state = "closed") ' +
     'ORDER BY T.state DESC';
-  connection.query(waitingTickets, [body.token], (error, response) => {
+  helpers.connection.query(waitingTickets, [body.token], (error, response) => {
     console.log('149-waitingTickets', response);
     if (error) res.sendStatus(500);
 
@@ -162,7 +162,7 @@ router.post('/', (req, res) => {
         state: "open"
       }
       const newTicket = 'INSERT INTO tickets SET ?';
-      connection.query(newTicket, [bodyNewTicket], (error, response) => {
+      helpers.connection.query(newTicket, [bodyNewTicket], (error, response) => {
         console.log('163-newTicket:', bodyNewTicket, response);
         if (error) res.status(500).json(error)
         else {
@@ -181,7 +181,7 @@ router.post('/', (req, res) => {
       const collab = { ...response[0], pseudo: body.pseudo } // toutes les infos ici
       console.log('179-collab:', collab);
       const update = 'UPDATE tickets SET pseudo = ? WHERE id = ?';
-      connection.query(update, [ collab.pseudo, collab.id], (error, response) => {
+      helpers.connection.query(update, [ collab.pseudo, collab.id], (error, response) => {
         console.log('182-update:', response, { pseudo: collab.pseudo }, collab.id);
         if (error) res.sendStatus(500);
         else {
@@ -208,7 +208,7 @@ router.post('/', (req, res) => {
 
       // Le token est-il dans la BDD ?
       const checkToken = 'SELECT id FROM users WHERE token = ? ';
-      connection.query(checkToken, [body.token], (error, response) => {
+      helpers.connection.query(checkToken, [body.token], (error, response) => {
         console.log("210-token?:", response, body)
 
         if (error) res.sendStatus(500);
@@ -223,7 +223,7 @@ router.post('/', (req, res) => {
             state: "open"
           }
           const newTicket = 'INSERT INTO tickets SET ?';
-          connection.query(newTicket, [bodyNewTicket], (error, response) => {
+          helpers.connection.query(newTicket, [bodyNewTicket], (error, response) => {
             console.log('224-newTicket:', bodyNewTicket, response);
             if (error) res.status(500).json(error)
             else {
@@ -253,7 +253,7 @@ router.post('/', (req, res) => {
 router.put('/state/:tid', verifyToken,(req, res)=>{
   ticketId = req.params.tid
   body = req.body 
-  connection.query('UPDATE tickets SET ? WHERE id = ?', [body, ticketId], (error, result)=>{
+  helpers.connection.query('UPDATE tickets SET ? WHERE id = ?', [body, ticketId], (error, result)=>{
     if (error) {
       console.log(error)
       res.status(500).json({flash: error.message})

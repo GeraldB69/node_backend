@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router()
 const cors = require('cors');
-const connection = require('../helpers/db.js');
+const helpers = require('../helpers/db.js');
 const bodyParser = require('body-parser');
 
 
@@ -25,7 +25,7 @@ router.get('/', (req, res, next) => {
       'FROM test_hpi.tickets) AS T ' +
       'ON T.id = M.tickets_id  ' +
       'WHERE T.collab_id = ?';
-    connection.query(sql, [collabId], (error, response) => {
+    helpers.connection.query(sql, [collabId], (error, response) => {
       if (error) 
         res.sendStatus(500);
       else 
@@ -52,7 +52,7 @@ router.get('/', (req, res, next) => {
       'AND M.sender_id = U.id) ' + 
       'WHERE T.channel = ? ' + 
       'ORDER BY M.timestamp ASC ';
-    connection.query(sql, [channelId], (error, response) => {
+    helpers.connection.query(sql, [channelId], (error, response) => {
       if (error) 
         res.sendStatus(500);
       else 
