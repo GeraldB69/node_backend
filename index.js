@@ -8,7 +8,8 @@ const connection = require('./helpers/db.js');
 const bodyParser = require('body-parser');
 const router = require('./routes');
 const cors = require('cors');
-const port = 4000;
+let port = 4000;
+// port = 80; // Cas du VPS
 
 
 // Configuration de l'application
