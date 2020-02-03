@@ -18,7 +18,7 @@ const port = (isOnline) ? 80 : 4000;
 
 
 // Configuration de l'application
-// app.use('/', exp.static('../lyon-sept19-projet3-groupehpi-front/build'));
+if (isOnline) app.use('/', exp.static('../lyon-sept19-projet3-groupehpi-front/build'));
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
