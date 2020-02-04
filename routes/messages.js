@@ -28,10 +28,11 @@ router.get('/', (req, res, next) => {
     helpers.connection.query(sql, [collabId], (error, response) => {
       if (error) 
         res.sendStatus(500);
-      else 
+      else {
         (response.length > 0) 
         ? res.status(200).json(response) 
         : res.status(204).send("No Content");
+      }
     });
   } else next();
 })

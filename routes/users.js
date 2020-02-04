@@ -25,7 +25,8 @@ router.get('/psy_on', (req, res) => {
   const sql = 'SELECT id FROM users WHERE role = ?';
   helpers.connection.query(sql, [status], (error, response) => {
     if (error)
-      res.status(500).json(error);
+      // res.status(500).json(error);
+      return;
     else
       res.status(200).json(response.length)
   })
@@ -37,7 +38,8 @@ router.get('/psy_busy', (req, res) => {
   const sql = 'SELECT id FROM users WHERE role = ?';
   helpers.connection.query(sql, [status], (error, response) => {
     if (error)
-      res.status(500).json(error);
+      // res.status(500).json(error);
+      return;
     else
       res.status(200).json(response.length)
   })
@@ -49,7 +51,8 @@ router.get('/psy_off', (req, res) => {
   const sql = 'SELECT id FROM users WHERE role = ?';
   helpers.connection.query(sql, [status], (error, response) => {
     if (error)
-      res.status(500).json(error);
+      // res.status(500).json(error);
+      return;
     else
       res.status(200).json(response.length)
   })
@@ -61,7 +64,8 @@ router.post('/auth/admin', (req, res) => {
   const id = req.body.data
   helpers.connection.query('SELECT * FROM users WHERE email = ?', [id.email], (error, response) => {
     if (error)
-      res.status(500).json(error);
+      // res.status(500).json(error);
+      return;
     else if (response.length > 0) {
       if (response[0].password === id.password) {
         console.log('Identification OK')
