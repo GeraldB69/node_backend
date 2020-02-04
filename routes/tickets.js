@@ -207,7 +207,6 @@ router.post('/', (req, res) => {
             else {
               // Token et id vérifiés : un nouveau ticket est crée
               newOnChannel(bodyNewTicket.channel, body.id);
-              global.io.emit('tickets')
               res.status(201).send({ 
                 id: body.id, 
                 channel: bodyNewTicket.channel, 
