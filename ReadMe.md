@@ -13,6 +13,8 @@ Dans helpers/db.js (dans .gitignore donc à copier en manuel) :
   - changer le password et éventuellement le nom de la DB (lignes 6 & 7)
   - pour le https, ajouter le nom de domaine et décommenter (ligne 11)
 
+Si pas besoin d'https, commenter les lignes 104 à 114 du fichier index.js
+
 
 # Liens de l'API
 
