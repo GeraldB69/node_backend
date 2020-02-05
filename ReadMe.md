@@ -8,7 +8,10 @@ npm start
 npm start
 
 ## Déploiement
-Dans index.js, passer isOnline à true
+Dans index.js : passer isOnline à true (ligne 15)
+Dans helpers/db.js (dans .gitignore donc à copier en manuel) : 
+  - changer le password et éventuellement le nom de la DB (lignes 6 & 7)
+  - pour le https, ajouter le nom de domaine et décommenter (ligne 11)
 
 
 # Liens de l'API
