@@ -1,3 +1,16 @@
+# Mise en route
+
+
+## Installation
+npm start
+
+## lancement
+npm start
+
+## Déploiement
+Dans index.js, passer isOnline à true
+
+
 # Liens de l'API
 
 
