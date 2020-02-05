@@ -11,4 +11,4 @@ const connection = mysql.createConnection({
 // const httpsPath = "/etc/letsencrypt/live/";
 
 module.exports.connection = connection;
-module.exports.httpsPath = httpsPath;
+// module.exports.httpsPath = httpsPath;
