@@ -4,7 +4,7 @@
 ## Installation
 npm i
 
-## lancement
+## Lancement
 npm start
 
 ## Déploiement
